@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from app.database import attendance_collection, employee_collection
 from app.schemas.attendance import AttendanceCreate
-from datetime import datetime
+from datetime import datetime, timedelta
 
 router = APIRouter(prefix="/attendance", tags=["Attendance"])
 
@@ -79,8 +79,18 @@ async def get_all_attendance(
 
     filters = []
 
+ 
+
     if date:
-        filters.append({"date": date})
+        start = datetime.strptime(date, "%Y-%m-%d")
+        end = start + timedelta(days=1)
+
+        filters.append({
+        "date": {
+            "$gte": start,
+            "$lt": end
+        }
+        })
 
     if search:
         filters.append({
