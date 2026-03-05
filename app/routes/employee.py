@@ -23,8 +23,19 @@ async def create_employee(employee: EmployeeCreate):
             detail="Employee with same email already exists"
         )
     # Generate unique employee ID
-    count = await employee_collection.count_documents({})
-    employee_id = f"EMP{count + 1:05d}"
+    last_employee = await employee_collection.find_one({}, sort=[("employee_id", -1)])
+    
+    if last_employee and "employee_id" in last_employee:
+        try:
+            last_id_num = int(last_employee["employee_id"].replace("EMP", ""))
+            next_id_num = last_id_num + 1
+        except ValueError:
+            next_id_num = 1
+    else:
+        next_id_num = 1
+        
+    employee_id = f"EMP{next_id_num:05d}"
+    
     employee_data = employee.dict()
     employee_data["employee_id"] = employee_id
 
