@@ -125,6 +125,11 @@ async def delete_multiple_employees(payload: DeleteEmployeesRequest):
             detail="No employees found for the provided IDs"
         )
 
+    # Delete corresponding attendance records
+    await attendance_collection.delete_many(
+        {"employee_id": {"$in": payload.employee_ids}}
+    )
+
     return {
         "success": True,
         "message": f"{result.deleted_count} employees deleted successfully",
